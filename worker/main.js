@@ -28,7 +28,9 @@ const register = () =>{
     },
     body: JSON.stringify({
       url : `${ADDRESS}:${port}`, 
-      id : id
+      id : id,
+      add : ADD,
+      mul : MULT 
     }),
   }).then((res) => {
     console.log("lol")

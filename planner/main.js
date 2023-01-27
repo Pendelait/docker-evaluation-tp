@@ -30,9 +30,9 @@ app.get('/', (req, res) => {
 
 app.post('/register', (req, res) => {
   console.log(req.body)
-  const { url, id } = req.body
+  const { url, id, add, mul } = req.body
   console.log(`Register: adding ${url} worker: ${id}`)
-  workers.push({ url, id })
+  workers.push({ url, id , add, mul})
   console.log(`J'ai recu un worker : ${workers}`)
   res.send('ok')
 })
@@ -50,7 +50,24 @@ const sendTask = async (worker, task) => {
   workers = workers.filter((w) => w.id !== worker.id)
   tasks = tasks.filter((t) => t !== task)
   console.log(`${worker.url}/${task.type}`)
+  switch (task.type){
+    case 'mult':
+      if (worker.mult != true){
+        workers = [...workers, worker]
+        tasks = [...tasks, task]
 
+        return
+      }
+      break
+    case 'add':
+      if (worker.add != true){
+        workers = [...workers, worker]
+        tasks = [...tasks, task]
+
+        return
+      }
+      break
+  }
   const request = fetch(`${worker.url}/${task.type}`, {
     method: 'POST',
     headers: {
