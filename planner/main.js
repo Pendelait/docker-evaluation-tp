@@ -1,4 +1,5 @@
 require('dotenv').config()
+const { exec } = require("child_process");
 const fetch = require('node-fetch')
 const express = require('express')
 
@@ -13,8 +14,8 @@ const generateTasks = (i) =>
   new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
 
 let workers = [
-  { url: 'http://worker0:8080', id: '0', add : false , mult : true},
-  { url: 'http://worker1:8081', id: '1' , add : true , mult : false}
+  { url: 'http://worker0:8080', id: '0'},
+  { url: 'http://worker1:8081', id: '1'}
 ]
 
 const app = express()
@@ -30,9 +31,11 @@ app.get('/', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
+  console.log(req.body)
   const { url, id } = req.body
   console.log(`Register: adding ${url} worker: ${id}`)
   workers.push({ url, id })
+  console.log(`J'ai recu un worker : ${workers}`)
   res.send('ok')
 })
 
@@ -50,27 +53,6 @@ const sendTask = async (worker, task) => {
   tasks = tasks.filter((t) => t !== task)
   console.log(`${worker.url}/${task.type}`)
 
-  console.log(`Je vais faire : ${task.type} avec le worker ${worker.url} qui a comme caracteristique
-ADDITION : ${worker.add} & MULTIPLICATION : ${worker.mult}`)
-  switch (task.type){
-    case 'mult':
-      if (worker.mult != true){
-        workers = [...workers, worker]
-        tasks = [...tasks, task]
-
-        return
-      }
-      break
-    case 'add':
-      if (worker.add != true){
-        workers = [...workers, worker]
-        tasks = [...tasks, task]
-
-        return
-      }
-      break
-  }
-  console.log("Je peux faire la tache")
   const request = fetch(`${worker.url}/${task.type}`, {
     method: 'POST',
     headers: {
