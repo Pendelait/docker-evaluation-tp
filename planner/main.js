@@ -13,7 +13,8 @@ const generateTasks = (i) =>
   new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
 
 let workers = [
-  { url: 'http://worker:8080', id: '' }
+  { url: 'http://worker0:8080', id: '0'},
+  { url: 'http://worker1:8081', id: '1'}
 ]
 
 const app = express()
@@ -74,7 +75,6 @@ const sendTask = async (worker, task) => {
 
 const main = async () => {
   console.log(tasks)
-  console.log("Je suis")
   while (taskToDo > 0) {
     await wait(1000)
     if (workers.length === 0 || tasks.length === 0) continue
