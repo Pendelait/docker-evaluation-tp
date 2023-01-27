@@ -14,8 +14,6 @@ const generateTasks = (i) =>
   new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
 
 let workers = [
-  { url: 'http://worker0:8080', id: '0'},
-  { url: 'http://worker1:8081', id: '1'}
 ]
 
 const app = express()
@@ -83,7 +81,6 @@ const main = async () => {
   console.log(tasks)
   while (taskToDo > 0) {
     await wait(1000)
-    console.log(`task to do ${taskToDo} , workerslenght : ${workers.length}`)
     if (workers.length === 0 || tasks.length === 0) continue
     sendTask(workers[0], tasks[0])
   }

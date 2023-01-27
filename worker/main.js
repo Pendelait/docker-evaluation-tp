@@ -18,15 +18,26 @@ const ADDRESS =
     ? process.env.ADDRESS
     : 'http://localhost:' + port
 const randInt = (min, max) => Math.floor(Math.random() * (max - min)) + min
-const register = () =>
-  fetch(PLANNER + '/register', {
+
+const register = () =>{
+  const request = fetch(`${PLANNER}/register`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ url: ADDRESS, id }),
+    body: JSON.stringify({
+      url : `${ADDRESS}:${port}`, 
+      id : id
+    }),
+  }).then((res) => {
+    console.log("lol")
   })
+  .catch((err) => {
+    console.error(' failed', err.message)
+  })
+}
+
 let mult = false
 let add = false
 let task = {}
@@ -36,6 +47,9 @@ app.use(
     extended: true,
   })
 )
+
+
+
 
 if (MULT)
   app.post('/mult', (req, res) => {
@@ -85,11 +99,11 @@ app.get('/', (req, res) => {
   res.send('ready to work ' + id)
 })
 
+
+
 app.listen(port, () => {
-  // register()
+  register()
   console.log(`Worker ${id} listening at http://localhost:${port}`)
-  console.log(`Multiplication : ${MULT} \nADDITION : ${ADD}`)
-  console.log(process.env.ADD)
-  console.log(process.env.MULT)
+  
 
 })
