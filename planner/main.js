@@ -13,8 +13,8 @@ const generateTasks = (i) =>
   new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
 
 let workers = [
-  { url: 'http://worker0:8080', id: '0'},
-  { url: 'http://worker1:8081', id: '1'}
+  { url: 'http://worker0:8080', id: '0', add : false , mult : true},
+  { url: 'http://worker1:8081', id: '1' , add : true , mult : false}
 ]
 
 const app = express()
@@ -42,11 +42,34 @@ let taskToDo = nbTasks
 const wait = (mili) =>
   new Promise((resolve, reject) => setTimeout(resolve, mili))
 
+
 const sendTask = async (worker, task) => {
   console.log(`=> ${worker.url}/${task.type}`, task)
   workers = workers.filter((w) => w.id !== worker.id)
   tasks = tasks.filter((t) => t !== task)
   console.log(`${worker.url}/${task.type}`)
+
+  console.log(`Je vais faire : ${task.type} avec le worker ${worker.url} qui a comme caracteristique
+ADDITION : ${worker.add} & MULTIPLICATION : ${worker.mult}`)
+  switch (task.type){
+    case 'mult':
+      if (worker.mult != true){
+        workers = [...workers, worker]
+        tasks = [...tasks, task]
+
+        return
+      }
+      break
+    case 'add':
+      if (worker.add != true){
+        workers = [...workers, worker]
+        tasks = [...tasks, task]
+
+        return
+      }
+      break
+  }
+  console.log("Je peux faire la tache")
   const request = fetch(`${worker.url}/${task.type}`, {
     method: 'POST',
     headers: {
@@ -73,10 +96,33 @@ const sendTask = async (worker, task) => {
     })
 }
 
+const deleteNotFeasible = () => {
+  let notFeasable = []
+  let newTasks = []
+  for (let i = tasks.length-1 ; i >= 0 ;i--){
+    if (isTaskFeasible(tasks[i]) == false) {
+      notFeasable.push(tasks[i])
+    }else{
+      newTasks.push(tasks[i])
+    }
+  }
+  tasks = newTasks
+  taskToDo = newTasks.length
+  return notFeasable
+}
+
+function isTaskFeasible(task) {
+  return workers.some(worker => (task.type === 'add' && worker.add === true) || (task.type === 'mult' && worker.mult === true));
+}
+
 const main = async () => {
   console.log(tasks)
+  let notFeasableTasks = deleteNotFeasible()
+  console.log(`Il y avait ${tasks.length+notFeasableTasks.length} tâches, mais ${notFeasableTasks.length} sont impossible à faire avec les workers actuel`)
+  console.log(`Il y a donc ${taskToDo} tâches à faire`)
   while (taskToDo > 0) {
     await wait(1000)
+    console.log(`task to do ${taskToDo} , workerslenght : ${workers.length}`)
     if (workers.length === 0 || tasks.length === 0) continue
     sendTask(workers[0], tasks[0])
   }
