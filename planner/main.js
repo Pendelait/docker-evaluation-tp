@@ -43,6 +43,7 @@ const wait = (mili) =>
   new Promise((resolve, reject) => setTimeout(resolve, mili))
 
 
+
 const sendTask = async (worker, task) => {
   console.log(`=> ${worker.url}/${task.type}`, task)
   workers = workers.filter((w) => w.id !== worker.id)
@@ -96,30 +97,8 @@ ADDITION : ${worker.add} & MULTIPLICATION : ${worker.mult}`)
     })
 }
 
-const deleteNotFeasible = () => {
-  let notFeasable = []
-  let newTasks = []
-  for (let i = tasks.length-1 ; i >= 0 ;i--){
-    if (isTaskFeasible(tasks[i]) == false) {
-      notFeasable.push(tasks[i])
-    }else{
-      newTasks.push(tasks[i])
-    }
-  }
-  tasks = newTasks
-  taskToDo = newTasks.length
-  return notFeasable
-}
-
-function isTaskFeasible(task) {
-  return workers.some(worker => (task.type === 'add' && worker.add === true) || (task.type === 'mult' && worker.mult === true));
-}
-
 const main = async () => {
   console.log(tasks)
-  let notFeasableTasks = deleteNotFeasible()
-  console.log(`Il y avait ${tasks.length+notFeasableTasks.length} tâches, mais ${notFeasableTasks.length} sont impossible à faire avec les workers actuel`)
-  console.log(`Il y a donc ${taskToDo} tâches à faire`)
   while (taskToDo > 0) {
     await wait(1000)
     console.log(`task to do ${taskToDo} , workerslenght : ${workers.length}`)
